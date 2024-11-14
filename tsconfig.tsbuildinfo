@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/main.tsx","./src/components/ApiKeyInput.tsx","./src/components/ChatInput.tsx","./src/components/ChatMessage.tsx","./src/components/MarkdownTools.tsx","./src/services/ai-providers.ts","./src/services/openai.ts"],"version":"5.6.3"}
