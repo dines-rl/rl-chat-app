@@ -174,21 +174,21 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ language, value }) => {
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ content, isUser, image }) => {
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-6 animate-fade-in`}>
       <div
-        className={`max-w-[80%] rounded-lg px-4 py-2 ${
+        className={`max-w-[85%] rounded-2xl px-5 py-3 shadow-sm transition-all duration-200 hover:shadow-md ${
           isUser
-            ? 'bg-blue-500 text-white rounded-br-none'
-            : 'bg-gray-100 text-gray-800 rounded-bl-none'
+            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-br-none'
+            : 'bg-white text-gray-800 rounded-bl-none border border-gray-200/60 backdrop-blur-sm'
         }`}
       >
         {image && (
-          <div className="mb-2">
-            <img src={image} alt="Uploaded content" className="max-w-full rounded-lg" />
+          <div className="mb-3">
+            <img src={image} alt="Uploaded content" className="max-w-full rounded-xl shadow-sm border border-gray-200/50" />
           </div>
         )}
         {isUser ? (
-          <p className="text-sm whitespace-pre-wrap">{content}</p>
+          <p className="text-sm whitespace-pre-wrap leading-relaxed">{content}</p>
         ) : (
           <div className="markdown-body text-sm">
             <ReactMarkdown
@@ -201,8 +201,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ content, isUser, image
                   
                   if (!match) {
                     return (
-                      <code 
-                        className="px-1.5 py-0.5 rounded bg-gray-200 text-gray-800 font-mono text-sm"
+                      <code
+                        className="px-2 py-1 rounded-md bg-gray-100/80 text-purple-700 font-mono text-sm border border-gray-200/50"
                         {...props}
                       >
                         {children}
