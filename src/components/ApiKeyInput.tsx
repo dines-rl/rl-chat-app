@@ -107,18 +107,21 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
 
   if (!isVisible && hasValidKey && hasValidRunloopKey) {
     return (
-      <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+      <div className="mb-8 p-5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200/60 shadow-sm">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-semibold text-gray-700">API Settings</h2>
-            <p className="text-xs text-gray-500 mt-1">
-              Using {provider === 'openai' ? 'OpenAI' : 'Claude'} API and Runloop API
-            </p>
+          <div className="flex items-center space-x-3">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <div>
+              <h2 className="text-sm font-semibold text-gray-700">Connected</h2>
+              <p className="text-xs text-gray-500 mt-1">
+                Using {provider === 'openai' ? 'OpenAI' : 'Claude'} API and Runloop API
+              </p>
+            </div>
           </div>
           <button
             type="button"
             onClick={() => setIsVisible(true)}
-            className="text-xs text-blue-500 hover:text-blue-600"
+            className="text-xs text-emerald-600 hover:text-emerald-700 font-medium px-3 py-1.5 rounded-lg bg-white/80 hover:bg-white transition-all duration-200 shadow-sm hover:shadow-md"
           >
             Change Settings
           </button>
@@ -128,14 +131,14 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-      <div className="flex items-center gap-2 mb-2">
-        <h2 className="text-sm font-semibold text-gray-700">API Settings</h2>
+    <form onSubmit={handleSubmit} className="mb-8 p-6 bg-gradient-to-r from-gray-50/80 to-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 shadow-lg">
+      <div className="flex items-center gap-3 mb-6">
+        <h2 className="text-lg font-semibold bg-gradient-to-r from-gray-700 to-gray-900 bg-clip-text text-transparent">API Settings</h2>
         {hasValidKey && hasValidRunloopKey && (
           <button
             type="button"
             onClick={() => setIsVisible(false)}
-            className="text-xs text-blue-500 hover:text-blue-600"
+            className="text-xs text-purple-600 hover:text-purple-700 font-medium px-3 py-1.5 rounded-lg bg-white/80 hover:bg-white transition-all duration-200 shadow-sm hover:shadow-md"
           >
             Hide
           </button>
@@ -143,8 +146,8 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
       </div>
       
       {/* AI API Settings */}
-      <div className="mb-4 p-4 bg-white rounded-lg border border-gray-200">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">AI Provider Settings</h3>
+      <div className="mb-6 p-5 bg-white/90 backdrop-blur-sm rounded-xl border border-gray-200/60 shadow-sm">
+        <h3 className="text-sm font-semibold text-gray-700 mb-4">AI Provider Settings</h3>
         <div className="flex flex-col gap-4">
           <div>
             <label htmlFor="provider" className="block text-sm font-medium text-gray-700 mb-1">
@@ -154,7 +157,7 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
               id="provider"
               value={provider}
               onChange={handleProviderChange}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none transition-all duration-200 bg-white"
             >
               <option value="openai">OpenAI</option>
               <option value="claude">Claude</option>
@@ -171,8 +174,8 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
               onChange={handleAiKeyChange}
               placeholder={`Enter your ${provider === 'openai' ? 'OpenAI' : 'Claude'} API key`}
               className={`w-full rounded-lg border ${
-                error ? 'border-red-300' : 'border-gray-300'
-              } px-4 py-2 text-sm focus:border-blue-500 focus:outline-none`}
+                error ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-gray-300 focus:border-purple-500 focus:ring-purple-500/20'
+              } px-4 py-3 text-sm focus:ring-2 focus:outline-none transition-all duration-200 bg-white`}
             />
             {error && (
               <p className="mt-2 text-xs text-red-500">{error}</p>
@@ -182,8 +185,8 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
       </div>
 
       {/* Runloop API Settings */}
-      <div className="mb-4 p-4 bg-white rounded-lg border border-gray-200">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">Runloop API Settings</h3>
+      <div className="mb-6 p-5 bg-white/90 backdrop-blur-sm rounded-xl border border-gray-200/60 shadow-sm">
+        <h3 className="text-sm font-semibold text-gray-700 mb-4">Runloop API Settings</h3>
         <div>
           <label htmlFor="runloopApiKey" className="block text-sm font-medium text-gray-700 mb-1">
             Runloop API Key
@@ -195,8 +198,8 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
             onChange={handleRunloopKeyChange}
             placeholder="Enter your Runloop API key"
             className={`w-full rounded-lg border ${
-              runloopError ? 'border-red-300' : 'border-gray-300'
-            } px-4 py-2 text-sm focus:border-blue-500 focus:outline-none`}
+              runloopError ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'border-gray-300 focus:border-purple-500 focus:ring-purple-500/20'
+            } px-4 py-3 text-sm focus:ring-2 focus:outline-none transition-all duration-200 bg-white`}
           />
           {runloopError && (
             <p className="mt-2 text-xs text-red-500">{runloopError}</p>
@@ -207,7 +210,7 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
       <div className="flex justify-end">
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none disabled:opacity-50"
+          className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500/50 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >
           Save Settings
         </button>

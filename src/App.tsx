@@ -115,10 +115,10 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="mx-auto max-w-3xl p-4">
-        <div className="rounded-lg bg-white p-6 shadow-lg">
-          <h1 className="mb-6 text-2xl font-bold text-gray-800">AI Chat Assistant</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800">
+      <div className="mx-auto max-w-4xl p-6">
+        <div className="backdrop-blur-sm bg-white/95 rounded-xl p-8 shadow-2xl border border-white/20">
+          <h1 className="mb-8 text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent text-center">AI Chat Assistant</h1>
           
           <ApiKeyInput 
             onApiKeyChange={handleApiKeyChange}
@@ -127,7 +127,7 @@ function App() {
             hasValidRunloopKey={hasValidRunloopKey}
           />
           
-          <div className="h-[500px] overflow-y-auto mb-4 scroll-smooth">
+          <div className="h-[500px] overflow-y-auto mb-6 scroll-smooth bg-gradient-to-b from-gray-50/50 to-white/50 rounded-lg p-4 border border-gray-200/50">
             {messages.map((message) => (
               <ChatMessage
                 key={message.id}
@@ -138,8 +138,15 @@ function App() {
             ))}
             {isLoading && (
               <div className="flex justify-start mb-4">
-                <div className="bg-gray-200 text-gray-800 rounded-lg rounded-bl-none px-4 py-2">
-                  <p className="text-sm">Thinking...</p>
+                <div className="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 rounded-lg rounded-bl-none px-4 py-3 shadow-sm">
+                  <div className="flex items-center space-x-2">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                    </div>
+                    <p className="text-sm font-medium">Thinking...</p>
+                  </div>
                 </div>
               </div>
             )}
