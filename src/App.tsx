@@ -79,19 +79,21 @@ function App() {
       });
     }
 
-    const userMessage: Message = {
-      id: messages.length + 1,
-      content,
-      isUser: true,
-      image: imageDataUrl,
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => {
+      const userMessage: Message = {
+        id: prev.length + 1,
+        content,
+        isUser: true,
+        image: imageDataUrl,
+      };
+      return [...prev, userMessage];
+    });
+
     setIsLoading(true);
 
     try {
       const aiResponse = await getChatCompletion(content, image);
-      
+
       setMessages(prev => [...prev, {
         id: prev.length + 1,
         content: aiResponse,
