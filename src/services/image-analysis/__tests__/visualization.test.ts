@@ -162,4 +162,21 @@ describe('generateMermaidDiagram', () => {
     expect(result).not.toContain('[Special & Chars]');
     expect(result).toContain('User Interface');
   });
+
+  it('preserves parentheses in contentType (they are allowed by the sanitizer)', () => {
+    const contentWithParens: ContentAnalysis = {
+      ...uiContent,
+      contentType: 'User Interface (Light Theme)',
+    };
+    const result = generateMermaidDiagram(dims, colors, edges, patterns, contentWithParens);
+    expect(result).toContain('User Interface (Light Theme)');
+  });
+
+  it('always includes the classDef section in output', () => {
+    const result = generateMermaidDiagram(dims, colors, edges, patterns, uiContent);
+    expect(result).toContain('classDef default');
+    expect(result).toContain('classDef highlight');
+    expect(result).toContain('classDef error');
+    expect(result).toContain('classDef success');
+  });
 });

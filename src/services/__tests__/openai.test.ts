@@ -98,6 +98,16 @@ describe('getChatCompletion', () => {
     await expect(getChatCompletion('Hi')).rejects.toThrow('Service unavailable');
   });
 
+  it('falls back to default message when message content is null', async () => {
+    initializeOpenAI('sk-test');
+    mockCreate.mockResolvedValueOnce({
+      choices: [{ message: { content: null } }],
+    });
+
+    const result = await getChatCompletion('Hello');
+    expect(result).toBe('Sorry, I could not process your request.');
+  });
+
   it('uses gpt-3.5-turbo as the model', async () => {
     initializeOpenAI('sk-test');
     mockCreate.mockResolvedValueOnce({

@@ -49,6 +49,21 @@ describe('initializeAI', () => {
 });
 
 // ---------------------------------------------------------------------------
+// getChatCompletion – not initialized
+// ---------------------------------------------------------------------------
+describe('getChatCompletion – not initialized', () => {
+  it('throws when called on a freshly imported module with no initializeAI call', async () => {
+    // Reset module registry so ai-providers starts with config = null
+    vi.resetModules();
+    const { getChatCompletion: freshGetChatCompletion } = await import('../ai-providers');
+
+    await expect(freshGetChatCompletion('Hello')).rejects.toThrow(
+      'AI provider not initialized. Please set a valid API key.'
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
 // getChatCompletion – OpenAI path
 // ---------------------------------------------------------------------------
 describe('getChatCompletion – OpenAI', () => {
@@ -99,6 +114,36 @@ describe('getChatCompletion – OpenAI', () => {
     const result = await getChatCompletion('Describe this', fakeFile);
     expect(result).toBe('Analyzed!');
     expect(processImage).toHaveBeenCalledWith(fakeFile);
+  });
+
+  it('uses gpt-4-0125-preview as the OpenAI model', async () => {
+    mockOpenAICreate.mockResolvedValueOnce({
+      choices: [{ message: { content: 'ok' } }],
+    });
+
+    await getChatCompletion('Hello');
+
+    expect(mockOpenAICreate).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'gpt-4-0125-preview' })
+    );
+  });
+
+  it('falls back to [Image analysis unavailable] when processImage throws', async () => {
+    const { processImage } = await import('../image-processor');
+    (processImage as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new Error('Canvas error')
+    );
+
+    mockOpenAICreate.mockResolvedValueOnce({
+      choices: [{ message: { content: 'ok' } }],
+    });
+
+    const fakeFile = new File(['data'], 'screenshot.png', { type: 'image/png' });
+    await getChatCompletion('Describe this', fakeFile);
+
+    const calledMessages: any[] = mockOpenAICreate.mock.calls[0][0].messages;
+    const userMsg = calledMessages.find((m: any) => m.role === 'user');
+    expect(userMsg.content).toContain('[Image analysis unavailable]');
   });
 });
 
@@ -158,5 +203,57 @@ describe('getChatCompletion – Claude', () => {
     const result = await getChatCompletion('Describe this', fakeFile);
     expect(result).toBe('Claude analyzed it!');
     expect(processImage).toHaveBeenCalledWith(fakeFile);
+  });
+
+  it('uses claude-3-opus-20240229 as the Claude model', async () => {
+    mockClaudeCreate.mockResolvedValueOnce({
+      content: [{ text: 'ok' }],
+    });
+
+    await getChatCompletion('Hello');
+
+    expect(mockClaudeCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'claude-3-opus-20240229' })
+    );
+  });
+
+  it('falls back to [Image analysis unavailable] when processImage throws', async () => {
+    const { processImage } = await import('../image-processor');
+    (processImage as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new Error('Canvas error')
+    );
+
+    mockClaudeCreate.mockResolvedValueOnce({ content: [{ text: 'ok' }] });
+
+    const fakeFile = new File(['data'], 'screenshot.png', { type: 'image/png' });
+    await getChatCompletion('Describe this', fakeFile);
+
+    const calledMessages: any[] = mockClaudeCreate.mock.calls[0][0].messages;
+    const userMsg = calledMessages[calledMessages.length - 1];
+    expect(userMsg.content).toContain('[Image analysis unavailable]');
+  });
+
+  it('re-throws generic Claude errors with their original message', async () => {
+    const err: any = new Error('Internal server error');
+    // no .status property → falls through to the generic re-throw
+    mockClaudeCreate.mockRejectedValueOnce(err);
+
+    await expect(getChatCompletion('Hi')).rejects.toThrow('Internal server error');
+  });
+
+  it('accumulates message history across multiple turns', async () => {
+    mockClaudeCreate
+      .mockResolvedValueOnce({ content: [{ text: 'Reply A' }] })
+      .mockResolvedValueOnce({ content: [{ text: 'Reply B' }] });
+
+    await getChatCompletion('Turn 1');
+    await getChatCompletion('Turn 2');
+
+    // Second call should include the prior user+assistant exchange in messages
+    const secondCallMessages: any[] = mockClaudeCreate.mock.calls[1][0].messages;
+    const contents = secondCallMessages.map((m: any) => m.content);
+    expect(contents).toContain('Turn 1');
+    expect(contents).toContain('Reply A');
+    expect(contents).toContain('Turn 2');
   });
 });

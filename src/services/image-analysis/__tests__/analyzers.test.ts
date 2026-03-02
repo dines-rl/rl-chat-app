@@ -83,6 +83,26 @@ describe('analyzeColors', () => {
     expect(result.darkRatio).toBe(0.5);
     expect(result.lightRatio).toBe(0.5);
   });
+
+  it('skips pixels with alpha 127 but counts pixels with alpha 128', () => {
+    const data = new Uint8ClampedArray([
+      0, 0, 0, 127, // alpha < 128 → skipped
+      0, 0, 0, 128, // alpha >= 128 → counted as dark
+    ]);
+    const result = analyzeColors(data, 2);
+
+    expect(result.dominantColors).toHaveLength(1);
+    expect(result.darkRatio).toBe(0.5); // 1 dark out of totalPixels=2
+  });
+
+  it('does not classify mid-range pixels as dark or light', () => {
+    // brightness = (128+128+128)/3 = 128 → not < 85, not > 170
+    const data = new Uint8ClampedArray([128, 128, 128, 255]);
+    const result = analyzeColors(data, 1);
+
+    expect(result.darkRatio).toBe(0);
+    expect(result.lightRatio).toBe(0);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -138,6 +158,33 @@ describe('analyzeEdges', () => {
       (result.horizontalEdges + result.verticalEdges) / totalPixels
     );
   });
+
+  it('increments rectangularShapes when both horizontal and vertical edges fire at the same pixel', () => {
+    // (1,1) differs strongly from both its left (0,1) and top (1,0) neighbours
+    const ctx = makeCtx({
+      '1,1': new Uint8ClampedArray([255, 255, 255, 255]), // current: bright
+      '0,1': new Uint8ClampedArray([0, 0, 0, 255]),       // left: dark  → horizontal edge
+      '1,0': new Uint8ClampedArray([0, 0, 0, 255]),       // top: dark   → vertical edge
+    });
+    const result = analyzeEdges(ctx, 2, 2);
+
+    expect(result.rectangularShapes).toBe(1);
+    expect(result.horizontalEdges).toBe(1);
+    expect(result.verticalEdges).toBe(1);
+  });
+
+  it('does not count an edge when the brightness difference is exactly 50', () => {
+    // diff must be > 50 to count; exactly 50 should be ignored
+    // brightness: current = (178+178+178)/3 = 178, left = (128+128+128)/3 = 128 → diff = 50
+    const ctx = makeCtx({
+      '1,1': new Uint8ClampedArray([178, 178, 178, 255]),
+      '0,1': new Uint8ClampedArray([128, 128, 128, 255]),
+      '1,0': new Uint8ClampedArray([178, 178, 178, 255]),
+    });
+    const result = analyzeEdges(ctx, 2, 2);
+
+    expect(result.horizontalEdges).toBe(0);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -185,6 +232,18 @@ describe('analyzePatterns', () => {
     const result = analyzePatterns(ctx, 5, 5);
 
     expect(result.regularPatterns).toBe(0);
+  });
+
+  it('returns 0 regular patterns when the image is too small to sample (3×3 or smaller)', () => {
+    // Loop starts at y=3 and x=3, so a 3×3 image never enters the loop body
+    const ctx = {
+      getImageData: vi.fn(() => ({ data: new Uint8ClampedArray(9 * 4).fill(128) })),
+    } as unknown as CanvasRenderingContext2D;
+
+    const result = analyzePatterns(ctx, 3, 3);
+
+    expect(result.regularPatterns).toBe(0);
+    expect(result.totalPixels).toBe(9);
   });
 });
 
@@ -299,5 +358,79 @@ describe('analyzeContent', () => {
     );
 
     expect(result.contentType).toBe('Complex Image or Photo');
+  });
+
+  it('detects error screen when pink is a dominant color (not just red)', () => {
+    const result = analyzeContent(
+      {
+        dominantColors: ['rgb(255,192,192)'],
+        darkRatio: 0.1,
+        lightRatio: 0.7,
+        brightness: 0.8,
+      },
+      { ...baseEdge, rectangularShapes: 2 },
+      { regularPatterns: 15, totalPixels: 100 }
+    );
+
+    expect(result.isErrorScreen).toBe(true);
+  });
+
+  it('does not classify as Document when hasText is true but normalizedEdges is below 0.2', () => {
+    // hasText requires horizontalEdges > verticalEdges * 1.5 AND normalizedEdges > 0.1
+    // But Document also requires normalizedEdges > 0.2
+    const result = analyzeContent(
+      baseColor,
+      {
+        horizontalEdges: 200,
+        verticalEdges: 100,
+        normalizedEdges: 0.15, // > 0.1 (hasText) but < 0.2 (not Document)
+        rectangularShapes: 0,
+      },
+      basePattern
+    );
+
+    expect(result.hasText).toBe(true);
+    expect(result.contentType).toBe('Complex Image or Photo');
+  });
+
+  it('does not flag as UI screen when regularPatterns threshold is not met', () => {
+    // rectangularShapes passes (> 1% of 100 = 1) but regularPatterns fails (< 10% of 100 = 10)
+    const result = analyzeContent(
+      baseColor,
+      { ...baseEdge, rectangularShapes: 2 },
+      { regularPatterns: 5, totalPixels: 100 } // 5 < 10
+    );
+
+    expect(result.isUIScreen).toBe(false);
+  });
+
+  it('does not flag error screen when darkRatio is exactly 0.2 (boundary is < 0.2)', () => {
+    const result = analyzeContent(
+      {
+        dominantColors: ['rgb(255,0,0)'],
+        darkRatio: 0.2,   // not < 0.2 → condition fails
+        lightRatio: 0.7,
+        brightness: 0.7,
+      },
+      { ...baseEdge, rectangularShapes: 2 },
+      { regularPatterns: 15, totalPixels: 100 }
+    );
+
+    expect(result.isErrorScreen).toBe(false);
+  });
+
+  it('does not flag error screen when lightRatio is exactly 0.6 (boundary is > 0.6)', () => {
+    const result = analyzeContent(
+      {
+        dominantColors: ['rgb(255,0,0)'],
+        darkRatio: 0.1,
+        lightRatio: 0.6,  // not > 0.6 → condition fails
+        brightness: 0.7,
+      },
+      { ...baseEdge, rectangularShapes: 2 },
+      { regularPatterns: 15, totalPixels: 100 }
+    );
+
+    expect(result.isErrorScreen).toBe(false);
   });
 });
