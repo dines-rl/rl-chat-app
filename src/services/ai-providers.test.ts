@@ -35,11 +35,11 @@ import { initializeAI, getChatCompletion } from './ai-providers';
 // Tests
 // ─────────────────────────────────────────────
 
-// This test MUST run before any successful initializeAI call so that
-// module-level state is still uninitialized.
 describe('getChatCompletion (before initialization)', () => {
   it('throws when no provider has been initialized', async () => {
-    await expect(getChatCompletion('hello')).rejects.toThrow(
+    vi.resetModules();
+    const { getChatCompletion: getChatCompletionFresh } = await import('./ai-providers');
+    await expect(getChatCompletionFresh('hello')).rejects.toThrow(
       'AI provider not initialized'
     );
   });

@@ -22,9 +22,17 @@ function buildPixelData(pixels: [number, number, number, number][]): Uint8Clampe
  *  `pixelValue` for every pixel regardless of coordinates. */
 function fakeCtx(pixelValue: [number, number, number, number]): CanvasRenderingContext2D {
   return {
-    getImageData: (_x: number, _y: number, _w: number, _h: number) => ({
-      data: new Uint8ClampedArray(pixelValue),
-    }),
+    getImageData: (_x: number, _y: number, _w: number, _h: number) => {
+      const numPixels = _w * _h;
+      const data = new Uint8ClampedArray(numPixels * 4);
+      for (let i = 0; i < numPixels; i++) {
+        data[i * 4] = pixelValue[0];
+        data[i * 4 + 1] = pixelValue[1];
+        data[i * 4 + 2] = pixelValue[2];
+        data[i * 4 + 3] = pixelValue[3];
+      }
+      return { data };
+    },
   } as unknown as CanvasRenderingContext2D;
 }
 
