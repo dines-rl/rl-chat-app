@@ -8,8 +8,25 @@ interface ApiKeyInputProps {
   hasValidRunloopKey?: boolean;
 }
 
-export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ 
-  onApiKeyChange, 
+const inputStyle: React.CSSProperties = {
+  background: 'rgba(255, 255, 255, 0.05)',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
+  color: '#e2e8f0',
+};
+
+const inputErrorStyle: React.CSSProperties = {
+  background: 'rgba(255, 255, 255, 0.05)',
+  border: '1px solid rgba(239, 68, 68, 0.5)',
+  color: '#e2e8f0',
+};
+
+const panelStyle: React.CSSProperties = {
+  background: 'rgba(255, 255, 255, 0.03)',
+  border: '1px solid rgba(255, 255, 255, 0.07)',
+};
+
+export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
+  onApiKeyChange,
   onRunloopKeyChange,
   hasValidKey,
   hasValidRunloopKey = false
@@ -95,7 +112,7 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
     localStorage.setItem('ai_api_key', aiApiKey);
     localStorage.setItem('ai_provider', provider);
     localStorage.setItem('runloop_api_key', runloopApiKey);
-    
+
     onApiKeyChange(provider, aiApiKey);
     onRunloopKeyChange(runloopApiKey);
   };
@@ -107,62 +124,64 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
 
   if (!isVisible && hasValidKey && hasValidRunloopKey) {
     return (
-      <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="flex items-center justify-between">
+      <div className="mb-4 px-4 py-3 rounded-xl flex items-center justify-between" style={panelStyle}>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400" />
           <div>
-            <h2 className="text-sm font-semibold text-gray-700">API Settings</h2>
-            <p className="text-xs text-gray-500 mt-1">
-              Using {provider === 'openai' ? 'OpenAI' : 'Claude'} API and Runloop API
+            <p className="text-xs font-semibold text-gray-300">API Settings</p>
+            <p className="text-xs text-gray-500">
+              Using {provider === 'openai' ? 'OpenAI' : 'Claude'} + Runloop
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsVisible(true)}
-            className="text-xs text-blue-500 hover:text-blue-600"
-          >
-            Change Settings
-          </button>
         </div>
+        <button
+          type="button"
+          onClick={() => setIsVisible(true)}
+          className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+        >
+          Change
+        </button>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-      <div className="flex items-center gap-2 mb-2">
-        <h2 className="text-sm font-semibold text-gray-700">API Settings</h2>
+    <form onSubmit={handleSubmit} className="mb-4 rounded-xl p-4" style={panelStyle}>
+      <div className="flex items-center gap-2 mb-3">
+        <h2 className="text-sm font-semibold text-gray-300">API Settings</h2>
         {hasValidKey && hasValidRunloopKey && (
           <button
             type="button"
             onClick={() => setIsVisible(false)}
-            className="text-xs text-blue-500 hover:text-blue-600"
+            className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
           >
             Hide
           </button>
         )}
       </div>
-      
+
       {/* AI API Settings */}
-      <div className="mb-4 p-4 bg-white rounded-lg border border-gray-200">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">AI Provider Settings</h3>
-        <div className="flex flex-col gap-4">
+      <div className="mb-3 p-3 rounded-lg" style={panelStyle}>
+        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">AI Provider</h3>
+        <div className="flex flex-col gap-3">
           <div>
-            <label htmlFor="provider" className="block text-sm font-medium text-gray-700 mb-1">
-              Select Provider
+            <label htmlFor="provider" className="block text-xs font-medium text-gray-400 mb-1">
+              Provider
             </label>
             <select
               id="provider"
               value={provider}
               onChange={handleProviderChange}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none transition-all"
+              style={{ ...inputStyle, appearance: 'auto' }}
             >
-              <option value="openai">OpenAI</option>
-              <option value="claude">Claude</option>
+              <option value="openai" style={{ background: '#1e1b4b' }}>OpenAI</option>
+              <option value="claude" style={{ background: '#1e1b4b' }}>Claude</option>
             </select>
           </div>
           <div>
-            <label htmlFor="aiApiKey" className="block text-sm font-medium text-gray-700 mb-1">
-              AI API Key
+            <label htmlFor="aiApiKey" className="block text-xs font-medium text-gray-400 mb-1">
+              API Key
             </label>
             <input
               type="password"
@@ -170,23 +189,22 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
               value={aiApiKey}
               onChange={handleAiKeyChange}
               placeholder={`Enter your ${provider === 'openai' ? 'OpenAI' : 'Claude'} API key`}
-              className={`w-full rounded-lg border ${
-                error ? 'border-red-300' : 'border-gray-300'
-              } px-4 py-2 text-sm focus:border-blue-500 focus:outline-none`}
+              className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none transition-all"
+              style={error ? inputErrorStyle : inputStyle}
             />
             {error && (
-              <p className="mt-2 text-xs text-red-500">{error}</p>
+              <p className="mt-1.5 text-xs" style={{ color: '#fca5a5' }}>{error}</p>
             )}
           </div>
         </div>
       </div>
 
       {/* Runloop API Settings */}
-      <div className="mb-4 p-4 bg-white rounded-lg border border-gray-200">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">Runloop API Settings</h3>
+      <div className="mb-3 p-3 rounded-lg" style={panelStyle}>
+        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Runloop</h3>
         <div>
-          <label htmlFor="runloopApiKey" className="block text-sm font-medium text-gray-700 mb-1">
-            Runloop API Key
+          <label htmlFor="runloopApiKey" className="block text-xs font-medium text-gray-400 mb-1">
+            API Key
           </label>
           <input
             type="password"
@@ -194,58 +212,47 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
             value={runloopApiKey}
             onChange={handleRunloopKeyChange}
             placeholder="Enter your Runloop API key"
-            className={`w-full rounded-lg border ${
-              runloopError ? 'border-red-300' : 'border-gray-300'
-            } px-4 py-2 text-sm focus:border-blue-500 focus:outline-none`}
+            className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none transition-all"
+            style={runloopError ? inputErrorStyle : inputStyle}
           />
           {runloopError && (
-            <p className="mt-2 text-xs text-red-500">{runloopError}</p>
+            <p className="mt-1.5 text-xs" style={{ color: '#fca5a5' }}>{runloopError}</p>
           )}
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-gray-600">Keys stored locally, never sent to our servers.</p>
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none disabled:opacity-50"
+          className="px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all"
+          style={{
+            background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+            boxShadow: '0 4px 12px rgba(79, 70, 229, 0.35)',
+          }}
         >
-          Save Settings
+          Save
         </button>
       </div>
 
-      <div className="mt-4 text-xs text-gray-500">
-        <p className="mb-1">Your API keys are stored locally in your browser and never sent to our servers.</p>
-        <p>
-          Get your API keys from:{' '}
-          {provider === 'openai' ? (
-            <a
-              href="https://platform.openai.com/api-keys"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:text-blue-600"
-            >
-              OpenAI's website
-            </a>
-          ) : (
-            <a
-              href="https://console.anthropic.com/account/keys"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:text-blue-600"
-            >
-              Anthropic's Console
-            </a>
-          )}
-          {' '}and{' '}
-          <a
-            href="https://runloop.ai/dashboard/api-keys"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:text-blue-600"
-          >
-            Runloop Dashboard
+      <div className="mt-3 text-xs text-gray-600">
+        Get your keys from:{' '}
+        {provider === 'openai' ? (
+          <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer"
+            className="text-indigo-400 hover:text-indigo-300">
+            OpenAI
           </a>
-        </p>
+        ) : (
+          <a href="https://console.anthropic.com/account/keys" target="_blank" rel="noopener noreferrer"
+            className="text-indigo-400 hover:text-indigo-300">
+            Anthropic Console
+          </a>
+        )}
+        {' '}and{' '}
+        <a href="https://runloop.ai/dashboard/api-keys" target="_blank" rel="noopener noreferrer"
+          className="text-indigo-400 hover:text-indigo-300">
+          Runloop Dashboard
+        </a>
       </div>
     </form>
   );

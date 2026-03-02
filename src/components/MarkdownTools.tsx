@@ -16,14 +16,29 @@ export const MarkdownTools: React.FC<MarkdownToolsProps> = ({ onToolClick }) => 
   ];
 
   return (
-    <div className="border-t border-gray-200 pt-4 mt-4">
-      <p className="text-sm font-medium text-gray-700 mb-2">Markdown Tools</p>
-      <div className="flex flex-wrap gap-2">
+    <div className="pt-2">
+      <div className="flex flex-wrap gap-1.5">
         {tools.map((tool) => (
           <button
             key={tool.label}
+            type="button"
             onClick={() => onToolClick(tool.markdown)}
-            className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+            className="px-2.5 py-1 text-xs rounded-lg font-medium transition-all"
+            style={{
+              background: 'rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: '#94a3b8',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(99, 102, 241, 0.2)';
+              e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+              e.currentTarget.style.color = '#a5b4fc';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.color = '#94a3b8';
+            }}
           >
             {tool.label}
           </button>
